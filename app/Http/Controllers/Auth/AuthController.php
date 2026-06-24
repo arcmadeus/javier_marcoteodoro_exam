@@ -33,6 +33,66 @@ class AuthController extends Controller
         return redirect()->route('storefront.index');
     }
 
-    
-    
+    public function login(LoginRequest $request)
+    {
+        $user = User::where('email', $request->email)->first();
+
+        if ($user && $user->isLocked()) {
+            throw ValidationException::withMessages([
+                'email' => 'Too many failed attempts. Try again later.'
+            ]);
+        }
+
+        if ($user && ! $user->is_active) {
+            throw ValidationException::withMessages([
+                'email' => 'This account has been deactivated. Contact an administrator.',
+            ]);
+        }
+
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            if ($user) {
+                $this->recordFailedAttempt($user);
+            }
+
+            throw ValidationException::withMessages([
+                'email' => 'These credentials do not match our records.',
+            ]);
+        }
+
+        // SUCESS
+        $user->update([
+            'failed_login_attempts' => 0,
+            'locked_until' => null,
+            'last_activity_at' => now(),
+        ]);
+
+        Auth::login($user, $request->boolean('remember'));
+        $request->session()->regenerate();
+
+        return $user->isAdmin()
+            ? redirect()->route('cms.dashboard')
+            : redirect()->route('storefront.index');
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
+
+    protected function recordFailedAttempt(User $user): void
+    {
+        $attempts = $user->failed_login_attempts + 1;
+
+        $user->failed_login_attempts = $attempts;
+
+        if ($attempts >= self::MAX_ATTEMPTS) {
+            $user->locked_until = now()->addMinutes(self::LOCKOUT_MINUTES);
+        }
+
+        $user->save();
+    }
 }
