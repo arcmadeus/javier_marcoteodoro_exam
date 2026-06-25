@@ -7,12 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { login } from '@/routes';
-import { store } from '@/routes/register';
-
-defineProps<{
-    passwordRules: string;
-}>();
+import { login, register } from '@/routes';
 
 defineOptions({
     layout: {
@@ -26,25 +21,25 @@ defineOptions({
     <Head title="Register" />
 
     <Form
-        v-bind="store.form()"
+        v-bind="register.form()"
         :reset-on-success="['password', 'password_confirmation']"
         v-slot="{ errors, processing }"
         class="flex flex-col gap-6"
     >
         <div class="grid gap-6">
             <div class="grid gap-2">
-                <Label for="name">Name</Label>
+                <Label for="full_name">Full Name</Label>
                 <Input
-                    id="name"
+                    id="full_name"
                     type="text"
                     required
                     autofocus
                     :tabindex="1"
                     autocomplete="name"
-                    name="name"
+                    name="full_name"
                     placeholder="Full name"
                 />
-                <InputError :message="errors.name" />
+                <InputError :message="errors.full_name" />
             </div>
 
             <div class="grid gap-2">
@@ -70,7 +65,6 @@ defineOptions({
                     autocomplete="new-password"
                     name="password"
                     placeholder="Password"
-                    :passwordrules="passwordRules"
                 />
                 <InputError :message="errors.password" />
             </div>
@@ -84,7 +78,6 @@ defineOptions({
                     autocomplete="new-password"
                     name="password_confirmation"
                     placeholder="Confirm password"
-                    :passwordrules="passwordRules"
                 />
                 <InputError :message="errors.password_confirmation" />
             </div>

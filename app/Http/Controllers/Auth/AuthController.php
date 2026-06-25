@@ -34,12 +34,12 @@ class AuthController extends Controller
     }
 
     public function login(LoginRequest $request)
-    {
+{
         $user = User::where('email', $request->email)->first();
 
         if ($user && $user->isLocked()) {
             throw ValidationException::withMessages([
-                'email' => 'Too many failed attempts. Try again later.'
+                'email' => 'Too many failed attempts. Try again in a few minutes.',
             ]);
         }
 
@@ -52,6 +52,13 @@ class AuthController extends Controller
         if (! $user || ! Hash::check($request->password, $user->password)) {
             if ($user) {
                 $this->recordFailedAttempt($user);
+                $user->refresh();
+
+                if ($user->isLocked()) {
+                    throw ValidationException::withMessages([
+                        'email' => 'Too many failed attempts. Try again in a few minutes.',
+                    ]);
+                }
             }
 
             throw ValidationException::withMessages([
@@ -59,7 +66,7 @@ class AuthController extends Controller
             ]);
         }
 
-        // SUCESS
+        // Successful login — reset lockout counters
         $user->update([
             'failed_login_attempts' => 0,
             'locked_until' => null,

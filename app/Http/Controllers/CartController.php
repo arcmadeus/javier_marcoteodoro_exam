@@ -10,7 +10,7 @@ class CartController extends Controller
 {
     public function index(Request $request)
     {
-        $cart = $request->user()->cart ?? $request->user()->cart()->create();
+        $cart = $request->user()->cart()->firstOrCreate([]);
         $cart->load('items.product');
 
         return response()->json([
@@ -23,7 +23,7 @@ class CartController extends Controller
     {
         $product = Product::findOrFail($request->product_id);
 
-        $cart = $request->user()->cart ?? $request->user()->cart()->create();
+        $cart = $request->user()->cart()->firstOrCreate([]);
 
         $existingItem = $cart->items()->where('product_id', $product->id)->first();
         $currentQtyInCart = $existingItem ? $existingItem->quantity : 0;

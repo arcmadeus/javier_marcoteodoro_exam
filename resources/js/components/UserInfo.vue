@@ -5,7 +5,7 @@ import { useInitials } from '@/composables/useInitials';
 import type { User } from '@/types';
 
 type Props = {
-    user: User;
+    user: User | null;
     showEmail?: boolean;
 };
 
@@ -14,23 +14,16 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const { getInitials } = useInitials();
-
-// Compute whether we should show the avatar image
-const showAvatar = computed(
-    () => props.user.avatar && props.user.avatar !== '',
-);
 </script>
 
 <template>
-    <Avatar class="h-8 w-8 overflow-hidden rounded-lg">
-        <AvatarImage v-if="showAvatar" :src="user.avatar!" :alt="user.name" />
+    <Avatar v-if="user" class="h-8 w-8 overflow-hidden rounded-lg">
         <AvatarFallback class="rounded-lg text-black dark:text-white">
-            {{ getInitials(user.name) }}
+            {{ getInitials(user.full_name) }}
         </AvatarFallback>
     </Avatar>
-
-    <div class="grid flex-1 text-left text-sm leading-tight">
-        <span class="truncate font-medium">{{ user.name }}</span>
+    <div v-if="user" class="grid flex-1 text-left text-sm leading-tight">
+        <span class="truncate font-medium">{{ user.full_name }}</span>
         <span v-if="showEmail" class="truncate text-xs text-muted-foreground">{{
             user.email
         }}</span>

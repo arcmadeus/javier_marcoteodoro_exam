@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -13,11 +12,11 @@ Route::get('/', function () {
 // Guest-only pages (can't visit login/register if already authenticated)
 Route::middleware('guest')->group(function () {
     Route::get('/login', function () {
-        return Inertia::render('Auth/Login');
+        return Inertia::render('auth/Login');
     })->name('login');
 
     Route::get('/register', function () {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('auth/Register');
     })->name('register.show');
 
     Route::post('/register', [AuthController::class, 'register'])->name('register');
@@ -28,7 +27,6 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Guest-role pages (cart, my orders)
     Route::get('/cart', function () {
         return Inertia::render('Storefront/Cart');
     })->name('cart.index');
