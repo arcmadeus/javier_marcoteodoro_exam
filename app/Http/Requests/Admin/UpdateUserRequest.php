@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -12,9 +13,11 @@ class UpdateUserRequest extends FormRequest
         return $this->user()->isAdmin();
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
-        $userId = $this->route('user')->id;
+        $routeUser = $this->route('user');
+        $userId = $routeUser instanceof User ? $routeUser->id : null;
 
         return [
             'full_name' => ['sometimes', 'required', 'string', 'max:255'],

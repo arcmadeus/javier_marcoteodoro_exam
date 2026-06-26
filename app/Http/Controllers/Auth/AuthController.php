@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -16,7 +18,7 @@ class AuthController extends Controller
     protected const MAX_ATTEMPTS = 5;
     protected const LOCKOUT_MINUTES = 5;
 
-    public function register(RegisterRequest $request) 
+    public function register(RegisterRequest $request): RedirectResponse
     {
         $user = User::create([
             'full_name' => $request->full_name,
@@ -33,8 +35,8 @@ class AuthController extends Controller
         return redirect()->route('storefront.index');
     }
 
-    public function login(LoginRequest $request)
-{
+    public function login(LoginRequest $request): RedirectResponse
+    {
         $user = User::where('email', $request->email)->first();
 
         if ($user && $user->isLocked()) {
@@ -81,7 +83,7 @@ class AuthController extends Controller
             : redirect()->route('storefront.index');
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): RedirectResponse
     {
         Auth::logout();
         $request->session()->invalidate();
@@ -97,7 +99,7 @@ class AuthController extends Controller
         $user->failed_login_attempts = $attempts;
 
         if ($attempts >= self::MAX_ATTEMPTS) {
-            $user->locked_until = now()->addMinutes(self::LOCKOUT_MINUTES);
+            $user->locked_until = Carbon::now()->addMinutes(self::LOCKOUT_MINUTES);
         }
 
         $user->save();

@@ -3,15 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-        $orders = $request->user()
-            ->orders()
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $orders = $user->orders()
             ->with('items')
             ->latest()
             ->paginate(10);
@@ -19,18 +21,22 @@ class OrderController extends Controller
         return response()->json($orders);
     }
 
-    public function show(Request $request, Order $order)
+    public function show(Request $request, Order $order): JsonResponse
     {
-        if ($order->user_id !== $request->user()->id) {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        if ($order->user_id !== $user->id) {
             abort(403, 'You cannot view this order.');
         }
 
         return response()->json($order->load('items'));
     }
 
-    public function checkout(Request $request)
+    public function checkout(Request $request): JsonResponse
     {
-        $cart = $request->user()->cart()->with('items.product')->first();
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $cart = $user->cart()->with('items.product')->first();
 
         if (! $cart || $cart->items->isEmpty()) {
             return response()->json(['message' => 'Your cart is empty.'], 422);
@@ -38,31 +44,35 @@ class OrderController extends Controller
 
         // Re-validate stock at checkout time — stock may have changed since items were added
         foreach ($cart->items as $item) {
-            if (! $item->product->isInStock($item->quantity)) {
+            /** @var \App\Models\Product $product */
+            $product = $item->product;
+            if (! $product->isInStock($item->quantity)) {
                 return response()->json([
-                    'message' => "\"{$item->product->name}\" no longer has enough stock for the quantity in your cart.",
+                    'message' => "\"{$product->name}\" no longer has enough stock for the quantity in your cart.",
                 ], 422);
             }
         }
 
-        $order = DB::transaction(function () use ($cart, $request) {
+        $order = DB::transaction(function () use ($cart, $user) {
             $total = $cart->items->sum(fn ($item) => $item->quantity * $item->product->price);
 
-            $order = $request->user()->orders()->create([
+            $order = $user->orders()->create([
                 'total' => $total,
                 'status' => 'Pending',
             ]);
 
             foreach ($cart->items as $item) {
+                /** @var \App\Models\Product $product */
+                $product = $item->product;
                 $order->items()->create([
-                    'product_id' => $item->product->id,
-                    'product_name' => $item->product->name,
-                    'price' => $item->product->price,
-                    'quantity' => $item->quantity,
+                    'product_id'   => $product->id,
+                    'product_name' => $product->name,
+                    'price'        => $product->price,
+                    'quantity'     => $item->quantity,
                 ]);
 
                 // Decrement stock now that the order is confirmed
-                $item->product->decrement('stock', $item->quantity);
+                $product->decrement('stock', $item->quantity);
             }
 
             // Clear the cart — checked-out items must be removed

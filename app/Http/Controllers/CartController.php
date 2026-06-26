@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AddToCartRequest;
+use App\Models\Cart;
 use App\Models\Product;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-        $cart = $request->user()->cart()->firstOrCreate([]);
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $cart = $user->cart()->firstOrCreate([]);
         $cart->load('items.product');
 
         return response()->json([
@@ -19,11 +23,14 @@ class CartController extends Controller
         ]);
     }
 
-    public function store(AddToCartRequest $request)
+    public function store(AddToCartRequest $request): JsonResponse
     {
+        /** @var Product $product */
         $product = Product::findOrFail($request->product_id);
 
-        $cart = $request->user()->cart()->firstOrCreate([]);
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $cart = $user->cart()->firstOrCreate([]);
 
         $existingItem = $cart->items()->where('product_id', $product->id)->first();
         $currentQtyInCart = $existingItem ? $existingItem->quantity : 0;
@@ -43,14 +50,19 @@ class CartController extends Controller
         return response()->json($item->load('product'), 201);
     }
 
-    public function update(Request $request, $itemId)
+    public function update(Request $request, int $itemId): JsonResponse
     {
-        $cart = $request->user()->cart;
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        /** @var Cart $cart */
+        $cart = $user->cart()->firstOrFail();
         $item = $cart->items()->findOrFail($itemId);
 
         $request->validate(['quantity' => ['required', 'integer', 'min:1']]);
 
-        if (! $item->product->isInStock($request->quantity)) {
+        /** @var Product $product */
+        $product = $item->product;
+        if (! $product->isInStock($request->quantity)) {
             return response()->json(['message' => 'Not enough stock available.'], 422);
         }
 
@@ -59,9 +71,12 @@ class CartController extends Controller
         return response()->json($item->load('product'));
     }
 
-    public function destroy(Request $request, $itemId)
+    public function destroy(Request $request, int $itemId): JsonResponse
     {
-        $cart = $request->user()->cart;
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        /** @var Cart $cart */
+        $cart = $user->cart()->firstOrFail();
         $cart->items()->where('id', $itemId)->delete();
 
         return response()->json(['message' => 'Item removed from cart.']);

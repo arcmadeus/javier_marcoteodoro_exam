@@ -6,18 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreProductRequest;
 use App\Http\Requests\Admin\UpdateProductRequest;
 use App\Models\Product;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
         $products = Product::query()->latest()->paginate(10);
 
         return response()->json($products);
     }
 
-    public function store(StoreProductRequest $request)
+    public function store(StoreProductRequest $request): JsonResponse
     {
         $data = $request->only(['name', 'price', 'stock']);
 
@@ -32,12 +33,12 @@ class ProductController extends Controller
         return response()->json($product, 201);
     }
 
-    public function show(Product $product)
+    public function show(Product $product): JsonResponse
     {
         return response()->json($product);
     }
 
-    public function update(UpdateProductRequest $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product): JsonResponse
     {
         $data = $request->only(['name', 'price', 'stock']);
 
@@ -60,7 +61,7 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
-    public function destroy(Product $product)
+    public function destroy(Product $product): JsonResponse
     {
         // Only delete from storage if it's a local file, not a URL
         if ($product->image_path && !str_starts_with($product->image_path, 'http')) {

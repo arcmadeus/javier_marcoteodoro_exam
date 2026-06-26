@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
         $products = Product::query()
             ->select('id', 'name', 'price', 'stock', 'image_path')
@@ -16,7 +17,7 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    public function show(Product $product)
+    public function show(Product $product): JsonResponse
     {
         return response()->json($product);
     }

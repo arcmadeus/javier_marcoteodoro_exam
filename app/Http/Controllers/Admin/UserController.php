@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,7 +15,7 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $users = User::query()
             ->when($request->search, fn ($q, $search)
@@ -29,7 +30,7 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreUserRequest $request)
+    public function store(StoreUserRequest $request): JsonResponse
     {
         $user = User::create([
             'full_name' => $request->full_name,
@@ -45,7 +46,7 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(User $user): JsonResponse
     {
         return response()->json($user);
     }
@@ -53,7 +54,7 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
         $data = $request->only(['full_name', 'email', 'role', 'is_active']);
 
@@ -69,7 +70,7 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(User $user): JsonResponse
     {
         if ($user->id === auth()->id()) {
             return response()->json(['message' => 'You cannot delete your own account.'], 422);
@@ -80,7 +81,7 @@ class UserController extends Controller
         return response()->json(['message' => 'User deleted successfully.']);
     }
 
-    public function toggleActive(User $user)
+    public function toggleActive(User $user): JsonResponse
     {
         if ($user->role !== 'guest') {
             return response()->json(['message' => 'Only guest accounts can be deactivated.'], 422);
@@ -94,24 +95,16 @@ class UserController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): void
     {
         //
     }
-
-    
-
-    
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(string $id): void
     {
         //
     }
-
-    
-
-    
 }

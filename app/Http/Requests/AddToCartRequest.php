@@ -11,6 +11,7 @@ class AddToCartRequest extends FormRequest
         return true; // gated by 'auth:sanctum' middleware on the route instead
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         return [
