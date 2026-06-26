@@ -3,7 +3,6 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import { ShoppingCart, Package, ClipboardList, LogIn, UserPlus, LogOut, Menu, X } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Toaster } from '@/components/ui/sonner';
 import { logout, login, register } from '@/routes';
 import { index as storefrontIndex } from '@/routes/storefront';

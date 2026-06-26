@@ -87,7 +87,8 @@ async function fetchUsers(pg = 1) {
             page: pg, search: search.value || undefined,
         } as Record<string, string | number | undefined>);
         users.value = res.data;
-        const { data: _, ...meta } = res;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { data: _omit, ...meta } = res;
         pagination.value = meta;
         currentPage.value = meta.current_page;
     } catch { /* silent */ } finally { loading.value = false; }

@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import { ClipboardList, ChevronDown, ChevronUp, Package, ArrowLeft, Loader2 } from '@lucide/vue';
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
 import { index as storefrontIndex } from '@/routes/storefront';
 
 interface OrderItem {
@@ -64,7 +63,8 @@ async function fetchOrders(pg = 1) {
     try {
         const res = await api.get<Pagination<Order>>(`/api/orders`, { page: pg });
         orders.value = res.data;
-        const { data: _, ...meta } = res;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { data: _omit, ...meta } = res;
         pagination.value = meta;
         currentPage.value = meta.current_page;
     } catch { // silent

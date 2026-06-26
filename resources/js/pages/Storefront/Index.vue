@@ -41,7 +41,8 @@ async function fetchProducts(pg = 1) {
     try {
         const res = await api.get<Pagination<Product>>('/api/products', { page: pg });
         products.value = res.data;
-        const { data: _, ...meta } = res;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { data: _omit, ...meta } = res;
         pagination.value = meta;
         currentPage.value = meta.current_page;
     } catch {

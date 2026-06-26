@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { router, usePage } from '@inertiajs/vue3';
-import { LogOut, User } from '@lucide/vue';
-import { computed } from 'vue';
+import { router } from '@inertiajs/vue3';
+import { LogOut } from '@lucide/vue';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,

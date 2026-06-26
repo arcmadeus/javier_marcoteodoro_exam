@@ -2,7 +2,6 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { login } from '@/routes';
 import { register } from '@/routes';
-import cms from '@/routes/cms';
 </script>
 
 <template>

@@ -65,7 +65,8 @@ async function fetchOrders(pg = 1) {
         if (filterStatus.value) params.status = filterStatus.value;
         const res = await api.get<Pagination<Order>>('/api/admin/orders', params);
         orders.value = res.data;
-        const { data: _, ...meta } = res;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { data: _omit, ...meta } = res;
         pagination.value = meta;
         currentPage.value = meta.current_page;
     } catch { /* silent */ } finally { loading.value = false; }
