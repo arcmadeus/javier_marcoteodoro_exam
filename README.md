@@ -76,3 +76,7 @@ This project is a full-stack e-commerce platform built with **Laravel**, **Vue.j
   ```bash
   npm run lint
   ```
+  
+* **Admin Account:**
+    Username: admin@purplebug.com
+    Password: Admin@12345
