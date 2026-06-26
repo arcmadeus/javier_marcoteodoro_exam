@@ -27,11 +27,13 @@ class Product extends Model
         ];
     }
 
+    /** @return HasMany<CartItem, Product> */
     public function cartItems(): HasMany
     {
         return $this->hasMany(CartItem::class);
     }
 
+    /** @return HasMany<OrderItem, Product> */
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);

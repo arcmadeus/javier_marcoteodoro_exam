@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AddToCartRequest;
 use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,11 +15,15 @@ class CartController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = $request->user();
+        /** @var Cart $cart */
         $cart = $user->cart()->firstOrCreate([]);
         $cart->load('items.product');
 
+        /** @var \Illuminate\Database\Eloquent\Collection<int, CartItem> $items */
+        $items = $cart->items;
+
         return response()->json([
-            'items' => $cart->items,
+            'items' => $items,
             'total' => $cart->total,
         ]);
     }
@@ -30,6 +35,7 @@ class CartController extends Controller
 
         /** @var \App\Models\User $user */
         $user = $request->user();
+        /** @var Cart $cart */
         $cart = $user->cart()->firstOrCreate([]);
 
         $existingItem = $cart->items()->where('product_id', $product->id)->first();

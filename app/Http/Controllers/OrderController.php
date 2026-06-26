@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Order;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,14 +38,22 @@ class OrderController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = $request->user();
+        /** @var Cart|null $cart */
         $cart = $user->cart()->with('items.product')->first();
 
-        if (! $cart || $cart->items->isEmpty()) {
+        if (! $cart) {
+            return response()->json(['message' => 'Your cart is empty.'], 422);
+        }
+
+        /** @var \Illuminate\Database\Eloquent\Collection<int, CartItem> $cartItems */
+        $cartItems = $cart->items;
+
+        if ($cartItems->isEmpty()) {
             return response()->json(['message' => 'Your cart is empty.'], 422);
         }
 
         // Re-validate stock at checkout time — stock may have changed since items were added
-        foreach ($cart->items as $item) {
+        foreach ($cartItems as $item) {
             /** @var \App\Models\Product $product */
             $product = $item->product;
             if (! $product->isInStock($item->quantity)) {
@@ -53,15 +63,15 @@ class OrderController extends Controller
             }
         }
 
-        $order = DB::transaction(function () use ($cart, $user) {
-            $total = $cart->items->sum(fn ($item) => $item->quantity * $item->product->price);
+        $order = DB::transaction(function () use ($cart, $cartItems, $user) {
+            $total = $cartItems->sum(fn (CartItem $item) => $item->quantity * $item->product->price);
 
             $order = $user->orders()->create([
                 'total' => $total,
                 'status' => 'Pending',
             ]);
 
-            foreach ($cart->items as $item) {
+            foreach ($cartItems as $item) {
                 /** @var \App\Models\Product $product */
                 $product = $item->product;
                 $order->items()->create([

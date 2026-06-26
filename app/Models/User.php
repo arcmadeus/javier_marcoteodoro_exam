@@ -46,11 +46,13 @@ class User extends Authenticatable
         ];
     }
 
+    /** @return HasOne<Cart, User> */
     public function cart(): HasOne
     {
         return $this->hasOne(Cart::class);
     }
 
+    /** @return HasMany<Order, User> */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
