@@ -26,6 +26,14 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\EnsureSessionIsActive::class,
         ]);
 
+        // Add session/cookie middleware to the api group so that auth:web
+        // (session guard) can authenticate requests from the Inertia SPA.
+        $middleware->api(prepend: [
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+        ]);
+
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
         ]);

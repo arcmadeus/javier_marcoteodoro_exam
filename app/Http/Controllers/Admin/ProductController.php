@@ -23,6 +23,8 @@ class ProductController extends Controller
 
         if ($request->hasFile('image')) {
             $data['image_path'] = $request->file('image')->store('products', 'public');
+        } elseif ($request->filled('image_url')) {
+            $data['image_path'] = $request->input('image_url');
         }
 
         $product = Product::create($data);
@@ -40,10 +42,17 @@ class ProductController extends Controller
         $data = $request->only(['name', 'price', 'stock']);
 
         if ($request->hasFile('image')) {
-            if ($product->image_path) {
+            // Delete old stored file (skip if it's a URL)
+            if ($product->image_path && !str_starts_with($product->image_path, 'http')) {
                 Storage::disk('public')->delete($product->image_path);
             }
             $data['image_path'] = $request->file('image')->store('products', 'public');
+        } elseif ($request->filled('image_url')) {
+            // Delete old stored file if replacing with URL
+            if ($product->image_path && !str_starts_with($product->image_path, 'http')) {
+                Storage::disk('public')->delete($product->image_path);
+            }
+            $data['image_path'] = $request->input('image_url');
         }
 
         $product->update($data);
@@ -53,7 +62,8 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        if ($product->image_path) {
+        // Only delete from storage if it's a local file, not a URL
+        if ($product->image_path && !str_starts_with($product->image_path, 'http')) {
             Storage::disk('public')->delete($product->image_path);
         }
 

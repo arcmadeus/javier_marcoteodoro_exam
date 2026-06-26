@@ -1,95 +1,37 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
-import InputError from '@/components/InputError.vue';
-import PasswordInput from '@/components/PasswordInput.vue';
-import TextLink from '@/components/TextLink.vue';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
-import { register } from '@/routes';
-import login from '@/routes/login';
-
-defineOptions({
-    layout: {
-        title: 'Log in to your account',
-        description: 'Enter your email and password below to log in',
-    },
-});
+import { router, usePage } from '@inertiajs/vue3';
+import { LogOut, User } from '@lucide/vue';
+import { computed } from 'vue';
+import {
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import UserInfo from '@/components/UserInfo.vue';
+import { logout } from '@/routes';
+import type { User as UserType } from '@/types';
 
 defineProps<{
-    status?: string;
+    user: UserType | null;
 }>();
+
+function handleLogout() {
+    router.post(logout.url());
+}
 </script>
 
 <template>
-    <Head title="Log in" />
-
-    <div
-        v-if="status"
-        class="mb-4 text-center text-sm font-medium text-green-600"
-    >
-        {{ status }}
-    </div>
-
-    <Form
-        v-bind="login.attempt.form()"
-        :reset-on-success="['password']"
-        v-slot="{ errors, processing }"
-        class="flex flex-col gap-6"
-    >
-        <div class="grid gap-6">
-            <div class="grid gap-2">
-                <Label for="email">Email address</Label>
-                <Input
-                    id="email"
-                    type="email"
-                    name="email"
-                    required
-                    autofocus
-                    :tabindex="1"
-                    autocomplete="email"
-                    placeholder="email@example.com"
-                />
-                <InputError :message="errors.email" />
-            </div>
-
-            <div class="grid gap-2">
-                <Label for="password">Password</Label>
-                <PasswordInput
-                    id="password"
-                    name="password"
-                    required
-                    :tabindex="2"
-                    autocomplete="current-password"
-                    placeholder="Password"
-                />
-                <InputError :message="errors.password" />
-            </div>
-
-            <div class="flex items-center justify-between">
-                <Label for="remember" class="flex items-center space-x-3">
-                    <Checkbox id="remember" name="remember" :tabindex="3" />
-                    <span>Remember me</span>
-                </Label>
-            </div>
-
-            <Button
-                type="submit"
-                class="mt-4 w-full"
-                :tabindex="4"
-                :disabled="processing"
-                data-test="login-button"
-            >
-                <Spinner v-if="processing" />
-                Log in
-            </Button>
+    <DropdownMenuLabel class="p-0 font-normal">
+        <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+            <UserInfo :user="user" :show-email="true" />
         </div>
-
-        <div class="text-center text-sm text-muted-foreground">
-            Don't have an account?
-            <TextLink :href="register()" :tabindex="5">Sign up</TextLink>
-        </div>
-    </Form>
+    </DropdownMenuLabel>
+    <DropdownMenuSeparator />
+    <DropdownMenuGroup>
+        <DropdownMenuItem @click="handleLogout" class="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950">
+            <LogOut class="mr-2 size-4" />
+            Log out
+        </DropdownMenuItem>
+    </DropdownMenuGroup>
 </template>

@@ -13,7 +13,7 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 
 
-Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth:web', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::patch('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
 
@@ -24,7 +24,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('admin.
 
 });
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:web')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
     Route::patch('/cart/{item}', [CartController::class, 'update'])->name('cart.update');
@@ -32,4 +32,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
-});
+});

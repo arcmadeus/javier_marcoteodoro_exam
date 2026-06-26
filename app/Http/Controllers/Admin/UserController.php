@@ -18,7 +18,7 @@ class UserController extends Controller
     {
         $users = User::query()
             ->when($request->search, fn ($q, $search)
-                => $q->where('full_name', 'like', "%{search}%")
+                => $q->where('full_name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
             )
             ->latest()
