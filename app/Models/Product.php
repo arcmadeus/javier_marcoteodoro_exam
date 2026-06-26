@@ -27,13 +27,13 @@ class Product extends Model
         ];
     }
 
-    /** @return HasMany<CartItem, Product> */
+    /** @return HasMany<CartItem, $this> */
     public function cartItems(): HasMany
     {
         return $this->hasMany(CartItem::class);
     }
 
-    /** @return HasMany<OrderItem, Product> */
+    /** @return HasMany<OrderItem, $this> */
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
